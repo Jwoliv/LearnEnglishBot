@@ -1,20 +1,14 @@
 package com.example.LearnEnglishBot.bot;
 
-import com.example.LearnEnglishBot.model.ConditionAuth;
-import com.example.LearnEnglishBot.model.User;
+import com.example.LearnEnglishBot.model.user.ConditionAuth;
+import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.service.UserService;
+import com.example.LearnEnglishBot.util.KeyboardBuilder;
+import com.example.LearnEnglishBot.util.MessageSender;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class LearnEnglishBot extends TelegramLongPollingBot {
@@ -22,9 +16,11 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private final UserService userService;
     private String username;
     private String password;
+    private final MessageSender msgSender;
 
-    public LearnEnglishBot(UserService userService) {
+    public LearnEnglishBot(UserService userService, MessageSender messageSender) {
         this.userService = userService;
+        this.msgSender = messageSender;
     }
 
     @Override
@@ -34,26 +30,30 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
             String text = msg.getText();
             long chatId = msg.getChatId();
             if (text.equals("/start")) {
-                sendMessage(chatId, """
-                        👋 Hi! I'm a bot for learning English words.
-                        📖 Here, you can add new words and learn them.
-                        ❗You need to authorized in the system
-                        """,
-                        createAccountKeyboard()
-                );
-                cndAuth = ConditionAuth.START_AUTH;
+                if (cndAuth.equals(ConditionAuth.FINISH)) {
+                    msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning English words.\n📖 Here, you can add new words and learn them.");
+                } else {
+                    msgSender.sendMessage(chatId, """
+                                    👋 Hi! I'm a bot for learning English words.
+                                    📖 Here, you can add new words and learn them.
+                                    ❗You need to authorized in the system
+                                    """,
+                            KeyboardBuilder.createAccountKeyboard()
+                    );
+                    cndAuth = ConditionAuth.START_AUTH;
+                }
             }
 
             else if (text.equals("Login")) {
                 cndAuth = ConditionAuth.LOGIN_WAIT_FOR_USERNAME;
-                sendMessage(chatId, "🔒 Please enter your username");
+                msgSender.sendMessage(chatId, "🔒 Please enter your username");
             }
             else if (text.equals("Sing in")) {
                 if (userService.findByChatId(chatId) == null) {
                     cndAuth = ConditionAuth.SING_IN_WAIT_FOR_USERNAME;
-                    sendMessage(chatId, "🔒 Please enter new username");
+                    msgSender.sendMessage(chatId, "🔒 Please enter new username");
                 } else {
-                    sendMessage(chatId, "❌ There is already an active user in this session\n🤔 Please try again", createAccountKeyboard());
+                    msgSender.sendMessage(chatId, "❌ There is already an active user in this session\n🤔 Please try again", KeyboardBuilder.createAccountKeyboard());
                 }
             }
 
@@ -62,9 +62,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                     username = text;
                     User user = userService.findByUsername(username);
                     if (user != null) {
-                        sendMessage(chatId, "❗ User with so username has already exist\n🔒 Enter other username");
+                        msgSender.sendMessage(chatId, "❗ User with so username has already exist\n🔒 Enter other username");
                     } else {
-                        sendMessage(chatId, "🔒 Please enter new password");
+                        msgSender.sendMessage(chatId, "🔒 Please enter new password");
                         cndAuth = ConditionAuth.SING_IN_WAIT_FOR_PASSWORD;
                     }
                 }
@@ -72,7 +72,7 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                     password = text;
                     User newUser = User.builder().username(username).password(password).chatId(chatId).build();
                     userService.save(newUser);
-                    sendMessage(chatId, "✅ User saved successfully");
+                    msgSender.sendMessage(chatId, "✅ User saved successfully");
                     cndAuth = ConditionAuth.FINISH;
                 }
             }
@@ -81,9 +81,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                     username = text;
                     User user = userService.findByUsername(username);
                     if (user == null) {
-                        sendMessage(chatId, "❗ User with so username doesn't exist\n🔒 Enter username again");
+                        msgSender.sendMessage(chatId, "❗ User with so username doesn't exist\n🔒 Enter username again");
                     } else {
-                        sendMessage(chatId, "🔒 Enter new password");
+                        msgSender.sendMessage(chatId, "🔒 Enter new password");
                         cndAuth = ConditionAuth.LOGIN_WAIT_FOR_PASSWORD;
                     }
                 }
@@ -93,54 +93,17 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                     if (user.getPassword().equals(password)) {
                         user.setChatId(chatId);
                         userService.save(user);
-                        sendMessage(chatId, "✅ User login successful");
+                        msgSender.sendMessage(chatId, "✅ User login successful");
+                        msgSender.sendMessage(chatId, "👉 Yo, you're in! You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
                         cndAuth = ConditionAuth.FINISH;
                     }
                     else {
-                        sendMessage(chatId, "❌ Wrong password please try again");
+                        msgSender.sendMessage(chatId, "❌ Wrong password please try again");
                     }
                 }
             }
         }
     }
-
-    private ReplyKeyboardMarkup createAccountKeyboard() {
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        keyboard.setOneTimeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add(new KeyboardButton("Login"));
-        row.add(new KeyboardButton("Sing in"));
-        rows.add(row);
-        keyboard.setKeyboard(rows);
-        return keyboard;
-    }
-
-
-    private void sendMessage(long chatId, String messageText) {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(messageText);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-    private void sendMessage(long chatId, String text, ReplyKeyboardMarkup keyboardMarkup) {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(text);
-        message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     @Override
     public String getBotUsername() {
@@ -151,4 +114,5 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return "6222379522:AAEBvxLMf7xhpo1qzqiH3IomWhPLa2aiI40";
     }
+
 }

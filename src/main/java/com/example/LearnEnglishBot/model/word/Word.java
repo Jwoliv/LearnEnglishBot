@@ -1,5 +1,8 @@
-package com.example.LearnEnglishBot.model;
+package com.example.LearnEnglishBot.model.word;
 
+import com.example.LearnEnglishBot.model.BaseEntity;
+import com.example.LearnEnglishBot.model.user.User;
+import com.example.LearnEnglishBot.model.word.wordList.WordList;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,4 +25,6 @@ public class Word implements BaseEntity {
     private Boolean isLearned;
     @ManyToOne
     private User user;
+    @ManyToOne
+    private WordList wordList;
 }

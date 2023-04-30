@@ -1,4 +1,4 @@
-package com.example.LearnEnglishBot.model;
+package com.example.LearnEnglishBot.model.user;
 
 public enum ConditionAuth {
     START_AUTH,

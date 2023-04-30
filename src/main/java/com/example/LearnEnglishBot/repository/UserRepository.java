@@ -1,6 +1,6 @@
 package com.example.LearnEnglishBot.repository;
 
-import com.example.LearnEnglishBot.model.User;
+import com.example.LearnEnglishBot.model.user.User;
 import org.springframework.stereotype.Repository;
 
 @Repository

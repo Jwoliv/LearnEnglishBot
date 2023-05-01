@@ -1,10 +1,17 @@
 package com.example.LearnEnglishBot.bot;
 
+import com.example.LearnEnglishBot.handlers.UserAuthHandler;
+import com.example.LearnEnglishBot.handlers.WordListHandler;
 import com.example.LearnEnglishBot.model.user.ConditionAuth;
-import com.example.LearnEnglishBot.model.user.User;
+import com.example.LearnEnglishBot.model.word.wordList.AccessLevel;
+import com.example.LearnEnglishBot.model.word.wordList.Category;
+import com.example.LearnEnglishBot.model.word.wordList.ConditionWordList;
+import com.example.LearnEnglishBot.model.word.wordList.EnglishLevel;
 import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -12,15 +19,22 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 public class LearnEnglishBot extends TelegramLongPollingBot {
-    private ConditionAuth cndAuth;
-    private final UserService userService;
-    private String username;
-    private String password;
-    private final MessageSender msgSender;
+    private final UserAuthHandler authHandler;
+    private final WordListHandler wordListHandler;
 
-    public LearnEnglishBot(UserService userService) {
+    private final UserService userService;
+    private MessageSender msgSender;
+
+    public LearnEnglishBot(UserService userService, UserAuthHandler authHandler, WordListHandler wordListHandler) {
         this.userService = userService;
-        this.msgSender = new MessageSender(this);
+        this.authHandler = authHandler;
+        this.wordListHandler = wordListHandler;
+    }
+
+    @Autowired
+    @Lazy
+    public void setMsgSender(MessageSender msgSender) {
+        this.msgSender = msgSender;
     }
 
     @Override
@@ -33,7 +47,7 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 if (userService.findByChatId(chatId) != null) {
                     msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning English words.\n📖 Here, you can add new words and learn them.");
                     msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-                    cndAuth = ConditionAuth.FINISH;
+                    authHandler.setCndAuth(ConditionAuth.FINISH);
                 } else {
                     msgSender.sendMessage(chatId, """
                                     👋 Hi! I'm a bot for learning English words.
@@ -45,60 +59,29 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 }
             }
 
-            else if (text.equals("Login")) {
-                cndAuth = ConditionAuth.LOGIN_WAIT_FOR_USERNAME;
-                msgSender.sendMessage(chatId, "🔒 Please enter your username");
+            else if (text.equals("Login") || text.equals("Sing in")) {
+                authHandler.handleInitialAuthInput(chatId, text);
             }
-            else if (text.equals("Sing in")) {
-                if (userService.findByChatId(chatId) == null) {
-                    cndAuth = ConditionAuth.SING_IN_WAIT_FOR_USERNAME;
-                    msgSender.sendMessage(chatId, "🔒 Please enter new username");
-                } else {
-                    msgSender.sendMessage(chatId, "❌ There is already an active user in this session\n🤔 Please try again", KeyboardBuilder.createAccountKeyboard());
-                }
+            else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
+                authHandler.handleSignUpInput(chatId, text);
             }
-
-            else if (cndAuth.toString().startsWith("SING_IN")) {
-                if (cndAuth.equals(ConditionAuth.SING_IN_WAIT_FOR_USERNAME)) {
-                    username = text;
-                    User user = userService.findByUsername(username);
-                    if (user != null) {
-                        msgSender.sendMessage(chatId, "❗ User with so username has already exist\n🔒 Enter other username");
-                    } else {
-                        msgSender.sendMessage(chatId, "🔒 Please enter new password");
-                        cndAuth = ConditionAuth.SING_IN_WAIT_FOR_PASSWORD;
-                    }
-                }
-                else if (cndAuth.equals(ConditionAuth.SING_IN_WAIT_FOR_PASSWORD)) {
-                    password = text;
-                    userService.singIn(username, password, chatId);
-                    msgSender.sendMessage(chatId, "✅ User saved successfully");
-                    msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-                    cndAuth = ConditionAuth.FINISH;
-                }
+            else if (authHandler.getCndAuth().toString().startsWith("LOGIN")) {
+                authHandler.handleLoginInput(chatId, text);
             }
-            else if (cndAuth.toString().startsWith("LOGIN")) {
-                if (cndAuth.equals(ConditionAuth.LOGIN_WAIT_FOR_USERNAME)) {
-                    username = text;
-                    User user = userService.findByUsername(username);
-                    if (user == null) {
-                        msgSender.sendMessage(chatId, "❗ User with so username doesn't exist\n🔒 Enter username again");
-                    } else {
-                        msgSender.sendMessage(chatId, "🔒 Enter new password");
-                        cndAuth = ConditionAuth.LOGIN_WAIT_FOR_PASSWORD;
-                    }
-                }
-                else if (cndAuth.equals(ConditionAuth.LOGIN_WAIT_FOR_PASSWORD)) {
-                    password = text;
-                    boolean isLogin = userService.login(username, password, chatId);
-                    if (isLogin) {
-                        msgSender.sendMessage(chatId, "✅ User login successful");
-                        msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-                    }
-                    else {
-                        msgSender.sendMessage(chatId, "❌ Wrong password please try again");
-                    }
-                }
+            else if (text.equals("🆕 New list")) {
+                wordListHandler.handleNameOfList(chatId);
+            }
+            else if (wordListHandler.getCndWordList().equals(ConditionWordList.WAIT_FOR_NAME)) {
+                wordListHandler.handleCategoryOfList(chatId, text);
+            }
+            else if (wordListHandler.getCndWordList().equals(ConditionWordList.WAIT_FOR_CATEGORY)) {
+                wordListHandler.handlerEnglishLevel(chatId, Category.valueOf(text));
+            }
+            else if (wordListHandler.getCndWordList().equals(ConditionWordList.WAIT_FOR_ENGLISH_LEVEL)) {
+                wordListHandler.handlerAccessLevel(chatId, EnglishLevel.valueOf(text));
+            }
+            else if (wordListHandler.getCndWordList().equals(ConditionWordList.WAIT_FOR_ACCESS_LEVEL)) {
+                wordListHandler.finallyCreatedListOfWords(chatId, AccessLevel.valueOf(text));
             }
         }
     }

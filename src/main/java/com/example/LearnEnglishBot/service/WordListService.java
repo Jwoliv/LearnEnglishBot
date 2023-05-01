@@ -6,10 +6,12 @@ import com.example.LearnEnglishBot.model.word.wordList.EnglishLevel;
 import com.example.LearnEnglishBot.model.word.wordList.WordList;
 import com.example.LearnEnglishBot.repository.WordListRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class WordListService extends BaseService<WordList, WordListRepository> {
     public WordListService(WordListRepository repository) {
         super(repository);

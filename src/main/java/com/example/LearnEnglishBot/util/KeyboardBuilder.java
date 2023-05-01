@@ -5,7 +5,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class KeyboardBuilder {
     public static ReplyKeyboardMarkup createAccountKeyboard() {
@@ -42,6 +44,30 @@ public class KeyboardBuilder {
         row3.add("📝 Take test");
         row3.add("👤 Profile");
         keyboard.add(row3);
+        keyboardMarkup.setKeyboard(keyboard);
+
+        return keyboardMarkup;
+    }
+    public static <E extends Enum<E>> ReplyKeyboardMarkup createKeyboardOfEnum(Class<E> enumClass) {
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setSelective(true);
+
+        List<List<E>> enumGroups = Arrays.stream(enumClass.getEnumConstants())
+                .collect(Collectors.partitioningBy(i -> (i.ordinal() % 2 == 0)))
+                .values()
+                .stream()
+                .toList();
+
+        List<KeyboardRow> keyboard = enumGroups.stream()
+                .map(enumGroup -> {
+                    KeyboardRow row = new KeyboardRow();
+                    enumGroup.forEach(enumValue -> row.add(new KeyboardButton(enumValue.toString())));
+                    return row;
+                })
+                .toList();
+
         keyboardMarkup.setKeyboard(keyboard);
 
         return keyboardMarkup;

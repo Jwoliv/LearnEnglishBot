@@ -18,9 +18,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private String password;
     private final MessageSender msgSender;
 
-    public LearnEnglishBot(UserService userService, MessageSender messageSender) {
+    public LearnEnglishBot(UserService userService) {
         this.userService = userService;
-        this.msgSender = messageSender;
+        this.msgSender = new MessageSender(this);
     }
 
     @Override
@@ -30,8 +30,10 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
             String text = msg.getText();
             long chatId = msg.getChatId();
             if (text.equals("/start")) {
-                if (cndAuth.equals(ConditionAuth.FINISH)) {
+                if (userService.findByChatId(chatId) != null) {
                     msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning English words.\n📖 Here, you can add new words and learn them.");
+                    msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
+                    cndAuth = ConditionAuth.FINISH;
                 } else {
                     msgSender.sendMessage(chatId, """
                                     👋 Hi! I'm a bot for learning English words.
@@ -40,7 +42,6 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                                     """,
                             KeyboardBuilder.createAccountKeyboard()
                     );
-                    cndAuth = ConditionAuth.START_AUTH;
                 }
             }
 
@@ -70,9 +71,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 }
                 else if (cndAuth.equals(ConditionAuth.SING_IN_WAIT_FOR_PASSWORD)) {
                     password = text;
-                    User newUser = User.builder().username(username).password(password).chatId(chatId).build();
-                    userService.save(newUser);
+                    userService.singIn(username, password, chatId);
                     msgSender.sendMessage(chatId, "✅ User saved successfully");
+                    msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
                     cndAuth = ConditionAuth.FINISH;
                 }
             }
@@ -89,13 +90,10 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 }
                 else if (cndAuth.equals(ConditionAuth.LOGIN_WAIT_FOR_PASSWORD)) {
                     password = text;
-                    User user = userService.findByUsername(username);
-                    if (user.getPassword().equals(password)) {
-                        user.setChatId(chatId);
-                        userService.save(user);
+                    boolean isLogin = userService.login(username, password, chatId);
+                    if (isLogin) {
                         msgSender.sendMessage(chatId, "✅ User login successful");
-                        msgSender.sendMessage(chatId, "👉 Yo, you're in! You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-                        cndAuth = ConditionAuth.FINISH;
+                        msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
                     }
                     else {
                         msgSender.sendMessage(chatId, "❌ Wrong password please try again");

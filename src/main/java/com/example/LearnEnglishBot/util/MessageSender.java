@@ -8,9 +8,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class MessageSender {
-    private LearnEnglishBot learnEnglishBot;
+    private final LearnEnglishBot learnEnglishBot;
 
-    public void setLearnEnglishBot(LearnEnglishBot learnEnglishBot) {
+    public MessageSender(LearnEnglishBot learnEnglishBot) {
         this.learnEnglishBot = learnEnglishBot;
     }
 

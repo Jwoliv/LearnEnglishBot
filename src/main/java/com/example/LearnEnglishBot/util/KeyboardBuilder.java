@@ -28,15 +28,19 @@ public class KeyboardBuilder {
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
-        row1.add("New word");
-        row1.add("New list");
+        row1.add("🆕 New word");
+        row1.add("🆕 New list");
+        row1.add("📚 All lists");
         keyboard.add(row1);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add("Delete list");
-        row2.add("Delete word");
+        row2.add("🗑️ Delete list");
+        row2.add("🗑️ Delete word");
+        row2.add("❌ Delete all lists");
         keyboard.add(row2);
         KeyboardRow row3 = new KeyboardRow();
-        row3.add("Learned word");
+        row3.add("✅ Learned word");
+        row3.add("📝 Take test");
+        row3.add("👤 Profile");
         keyboard.add(row3);
         keyboardMarkup.setKeyboard(keyboard);
 

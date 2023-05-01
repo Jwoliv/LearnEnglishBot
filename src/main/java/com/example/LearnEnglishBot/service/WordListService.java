@@ -25,4 +25,13 @@ public class WordListService extends BaseService<WordList, WordListRepository> {
         return repository.findByCategoryAndEnglishLevel(category, engLvl);
     }
 
+    public WordList findByTitleAndUser(String title, User user) {
+        return repository.findByTitleAndUser(title, user);
+    }
+
+    @Transactional
+    public void deleteAllByUser(User user) {
+        repository.deleteAllByUser(user);
+    }
+
 }

@@ -8,6 +8,7 @@ import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
 import lombok.Getter;
 import lombok.Setter;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -39,12 +40,84 @@ public class WordListHandler {
         this.msgSender = msgSender;
     }
 
-    public void handleNameOfList(Long chatId) {
+    public void activeWithList(Long chatId, String text) {
+        if (text.equals("🆕 New list")) {
+            handleNameOfList(chatId);
+        }
+        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_NAME)) {
+            handleCategoryOfList(chatId, text);
+        }
+        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_CATEGORY)) {
+            handlerEnglishLevel(chatId, Category.valueOf(text));
+        }
+        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_ENGLISH_LEVEL)) {
+            handlerAccessLevel(chatId, EnglishLevel.valueOf(text));
+        }
+        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_ACCESS_LEVEL)) {
+            finallyCreatedListOfWords(chatId, AccessLevel.valueOf(text));
+        }
+        else if (getCndWordList().equals(ConditionWordList.DELETE_LIST) && userService.findByChatId(chatId).getWordLists().stream().map(WordList::getTitle).toList().contains(text)) {
+            deleteList(chatId, text);
+        }
+        else if (getCndWordList().equals(ConditionWordList.DELETE_ALL)) {
+            deleteAllListByUser(chatId, text);
+        }
+    }
+    public void handlerGetAllListsByUser(Long chatId) {
+        if (userService.findByChatId(chatId).getWordLists().size() != 0) {
+            msgSender.sendMessage(chatId, "📚 Your lists of words", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId)));
+        }
+        else {
+            msgSender.sendMessage(chatId, "📚 Your collection of lists is empty", KeyboardBuilder.createFunctionalKeyboard());
+        }
+    }
+    public void handlerDeleteSelectedList(Long chatId) {
+        if (userService.findByChatId(chatId).getWordLists().size() != 0) {
+            setCndWordList(ConditionWordList.DELETE_LIST);
+            msgSender.sendMessage(chatId, "📚 Your lists of words", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId)));
+        }
+        else {
+            msgSender.sendMessage(chatId, "📚 Your collection of lists is empty", KeyboardBuilder.createFunctionalKeyboard());
+        }
+    }
+    public void handlerDeleteAllList(Long chatId) {
+        if (userService.findByChatId(chatId).getWordLists().size() != 0) {
+            setCndWordList(ConditionWordList.DELETE_ALL);
+            msgSender.sendMessage(chatId, "❗ Right now your deleted all your lists\n🔒 Please enter new password");
+        }
+        else {
+            msgSender.sendMessage(chatId, "📚 Your collection of lists is empty", KeyboardBuilder.createFunctionalKeyboard());
+        }
+    }
+
+
+    private void deleteAllListByUser(Long chatId, String text) {
+        User user = userService.findByChatId(chatId);
+        if (BCrypt.checkpw(text, user.getPassword())) {
+            wordListService.deleteAllByUser(user);
+            msgSender.sendMessage(chatId, "🗑️ The all list deleted successfully", KeyboardBuilder.createFunctionalKeyboard());
+            cndWordList = ConditionWordList.NONE;
+        } else {
+            msgSender.sendMessage(chatId, "🚫 Wrong password\nPlease try again");
+        }
+    }
+
+    private void deleteList(Long chatId, String text) {
+        User user = userService.findByChatId(chatId);
+        WordList list = wordListService.findByTitleAndUser(text, user);
+        if (list != null) {
+            wordListService.deleteById(list.getId());
+            msgSender.sendMessage(chatId, "🗑️ The list has deleted correct", KeyboardBuilder.createFunctionalKeyboard());
+            cndWordList = ConditionWordList.NONE;
+        }
+    }
+
+    private void handleNameOfList(Long chatId) {
         cndWordList = ConditionWordList.WAIT_FOR_NAME;
         msgSender.sendMessage(chatId, "📝 Please enter the name of list");
     }
 
-    public void handleCategoryOfList(Long chatId, String text) {
+    private void handleCategoryOfList(Long chatId, String text) {
         title = text;
         boolean listWithSoNameIsExisted = false;
         User user = userService.findByChatId(chatId);
@@ -67,23 +140,24 @@ public class WordListHandler {
         }
     }
 
-    public void handlerEnglishLevel(Long chatId, Category text) {
+
+    private void handlerEnglishLevel(Long chatId, Category text) {
         category = text;
         cndWordList = ConditionWordList.WAIT_FOR_ENGLISH_LEVEL;
         msgSender.sendMessage(chatId, "🌐 Please selected an english level", KeyboardBuilder.createKeyboardOfEnum(EnglishLevel.class));
     }
 
-    public void handlerAccessLevel(Long chatId, EnglishLevel text) {
+    private void handlerAccessLevel(Long chatId, EnglishLevel text) {
         engLvl = text;
         cndWordList = ConditionWordList.WAIT_FOR_ACCESS_LEVEL;
         msgSender.sendMessage(chatId, "🔐 Select an access level", KeyboardBuilder.createKeyboardOfEnum(AccessLevel.class));
     }
-    public void finallyCreatedListOfWords(Long chatId, AccessLevel text) {
+
+    private void finallyCreatedListOfWords(Long chatId, AccessLevel text) {
         accessLevel = text;
         cndWordList = ConditionWordList.NONE;
         saveListAndSetFields(chatId);
     }
-
 
     private void saveListAndSetFields(Long chatId) {
         User user = userService.findByChatId(chatId);

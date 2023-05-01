@@ -1,5 +1,7 @@
 package com.example.LearnEnglishBot.util;
 
+import com.example.LearnEnglishBot.model.user.User;
+import com.example.LearnEnglishBot.model.word.wordList.WordList;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -72,5 +74,25 @@ public class KeyboardBuilder {
 
         return keyboardMarkup;
     }
+    public static ReplyKeyboardMarkup createKeyboardOfWordListOfUser(User user) {
+        List<WordList> wordLists = user.getWordLists();
 
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setSelective(true);
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        for (WordList wordList : wordLists) {
+            KeyboardButton button = new KeyboardButton(wordList.getTitle());
+            KeyboardRow row = new KeyboardRow();
+            row.add(button);
+            keyboardRows.add(row);
+        }
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+
+        return keyboardMarkup;
+    }
 }

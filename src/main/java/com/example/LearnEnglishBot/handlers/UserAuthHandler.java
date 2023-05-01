@@ -40,7 +40,8 @@ public class UserAuthHandler {
             if (userService.findByChatId(chatId) == null) {
                 cndAuth = ConditionAuth.SING_IN_WAIT_FOR_USERNAME;
                 msgSender.sendMessage(chatId, "🔒 Please enter new username");
-            } else {
+            }
+            else {
                 msgSender.sendMessage(chatId, "❌ There is already an active user in this session\n🤔 Please try again", KeyboardBuilder.createAccountKeyboard());
             }
         }
@@ -51,7 +52,8 @@ public class UserAuthHandler {
             User user = userService.findByUsername(username);
             if (user != null) {
                 msgSender.sendMessage(chatId, "❗ User with so username has already exist\n🔒 Enter other username");
-            } else {
+            }
+            else {
                 msgSender.sendMessage(chatId, "🔒 Please enter new password");
                 cndAuth = ConditionAuth.SING_IN_WAIT_FOR_PASSWORD;
             }
@@ -71,7 +73,8 @@ public class UserAuthHandler {
             User user = userService.findByUsername(username);
             if (user == null) {
                 msgSender.sendMessage(chatId, "❗ User with so username doesn't exist\n🔒 Enter username again");
-            } else {
+            }
+            else {
                 msgSender.sendMessage(chatId, "🔒 Enter new password");
                 cndAuth = ConditionAuth.LOGIN_WAIT_FOR_PASSWORD;
             }

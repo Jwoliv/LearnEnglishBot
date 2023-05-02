@@ -4,7 +4,6 @@ import com.example.LearnEnglishBot.handlers.CommandHandler;
 import com.example.LearnEnglishBot.handlers.UserAuthHandler;
 import com.example.LearnEnglishBot.handlers.WordHandler;
 import com.example.LearnEnglishBot.handlers.WordListHandler;
-import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +19,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private final WordListHandler wordListHandler;
     private final CommandHandler cmdHandler;
     private final WordHandler wordHandler;
-
-
-    private final UserService userService;
     private MessageSender msgSender;
 
-    public LearnEnglishBot(UserService userService, UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler) {
-        this.userService = userService;
+    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler) {
         this.authHandler = authHandler;
         this.wordListHandler = wordListHandler;
         this.cmdHandler = cmdHandler;
@@ -46,10 +41,12 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
             String text = msg.getText();
             long chatId = msg.getChatId();
             if (text.equals("/start")) {
+                resetTrackingStatus();
                 cmdHandler.startMessage(chatId);
             }
             else if (text.equals("/reset")) {
-                resetTrackingStatus(chatId);
+                resetTrackingStatus();
+                msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
             }
             else {
                 if (text.equals("Login") || text.equals("Sing in")) {
@@ -67,7 +64,7 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
                     wordListHandler.activeWithList(chatId, text);
                 }
-                else if (wordHandler.getCndWord() != null || text.equals("🆕 New word")) {
+                else if (wordHandler.getCndWord() != null || text.equals("🆕 New word") || text.equals("🗑️ Delete word")) {
                     wordHandler.activeWord(chatId, text);
                 }
                 else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
@@ -90,10 +87,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
         return "6222379522:AAEBvxLMf7xhpo1qzqiH3IomWhPLa2aiI40";
     }
 
-    public void resetTrackingStatus(Long chatId) {
+    public void resetTrackingStatus() {
         wordListHandler.setCndWordList(null);
         wordHandler.setCndWord(null);
         authHandler.setCndAuth(null);
-        msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
     }
 }

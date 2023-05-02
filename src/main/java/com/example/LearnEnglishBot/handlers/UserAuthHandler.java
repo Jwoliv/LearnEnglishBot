@@ -1,7 +1,6 @@
 package com.example.LearnEnglishBot.handlers;
 
 import com.example.LearnEnglishBot.model.user.ConditionAuth;
-import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
@@ -49,7 +48,7 @@ public class UserAuthHandler {
     public void handleSignUpInput(Long chatId, String text) {
         if (cndAuth.equals(ConditionAuth.SING_IN_WAIT_FOR_USERNAME)) {
             username = text;
-            User user = userService.findByUsername(username);
+            var user = userService.findByUsername(username);
             if (user != null) {
                 msgSender.sendMessage(chatId, "❗ User with so username has already exist\n🔒 Enter other username");
             }
@@ -70,7 +69,7 @@ public class UserAuthHandler {
     public void handleLoginInput(Long chatId, String text) {
         if (cndAuth.equals(ConditionAuth.LOGIN_WAIT_FOR_USERNAME)) {
             username = text;
-            User user = userService.findByUsername(username);
+            var user = userService.findByUsername(username);
             if (user == null) {
                 msgSender.sendMessage(chatId, "❗ User with so username doesn't exist\n🔒 Enter username again");
             }
@@ -81,7 +80,7 @@ public class UserAuthHandler {
         }
         else if (cndAuth.equals(ConditionAuth.LOGIN_WAIT_FOR_PASSWORD)) {
             password = text;
-            boolean isLogin = userService.login(username, password, chatId);
+            var isLogin = userService.login(username, password, chatId);
             if (isLogin) {
                 msgSender.sendMessage(chatId, "✅ User login successful");
                 msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());

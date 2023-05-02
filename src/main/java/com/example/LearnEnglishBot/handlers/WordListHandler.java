@@ -1,6 +1,5 @@
 package com.example.LearnEnglishBot.handlers;
 
-import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.model.wordList.*;
 import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.service.WordListService;
@@ -92,7 +91,7 @@ public class WordListHandler {
 
 
     private void deleteAllListByUser(Long chatId, String text) {
-        User user = userService.findByChatId(chatId);
+        var user = userService.findByChatId(chatId);
         if (BCrypt.checkpw(text, user.getPassword())) {
             wordListService.deleteAllByUser(user);
             msgSender.sendMessage(chatId, "🗑️ The all list deleted successfully", KeyboardBuilder.createFunctionalKeyboard());
@@ -103,8 +102,8 @@ public class WordListHandler {
     }
 
     private void deleteList(Long chatId, String text) {
-        User user = userService.findByChatId(chatId);
-        WordList list = wordListService.findByTitleAndUser(text, user);
+        var user = userService.findByChatId(chatId);
+        var list = wordListService.findByTitleAndUser(text, user);
         if (list != null) {
             wordListService.deleteById(list.getId());
             msgSender.sendMessage(chatId, "🗑️ The list has deleted correct", KeyboardBuilder.createFunctionalKeyboard());
@@ -119,8 +118,8 @@ public class WordListHandler {
 
     private void handleCategoryOfList(Long chatId, String text) {
         title = text;
-        boolean listWithSoNameIsExisted = false;
-        User user = userService.findByChatId(chatId);
+        var listWithSoNameIsExisted = false;
+        var user = userService.findByChatId(chatId);
         List<WordList> wordLists = user.getWordLists();
         if (wordLists.size() != 0) {
             for (WordList wordList : wordLists) {
@@ -160,8 +159,8 @@ public class WordListHandler {
     }
 
     private void saveListAndSetFields(Long chatId) {
-        User user = userService.findByChatId(chatId);
-        WordList wordList = WordList.builder()
+        var user = userService.findByChatId(chatId);
+        var wordList = WordList.builder()
                 .title(title)
                 .category(category)
                 .user(user)

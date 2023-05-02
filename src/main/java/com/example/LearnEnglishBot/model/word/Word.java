@@ -1,6 +1,7 @@
 package com.example.LearnEnglishBot.model.word;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
+import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.model.wordList.WordList;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,4 +26,7 @@ public class Word implements BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     private WordList wordList;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private User user;
 }

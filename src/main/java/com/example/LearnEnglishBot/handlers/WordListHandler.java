@@ -1,7 +1,7 @@
 package com.example.LearnEnglishBot.handlers;
 
 import com.example.LearnEnglishBot.model.user.User;
-import com.example.LearnEnglishBot.model.word.wordList.*;
+import com.example.LearnEnglishBot.model.wordList.*;
 import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.service.WordListService;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
@@ -171,5 +171,6 @@ public class WordListHandler {
 
         wordListService.save(wordList);
         msgSender.sendMessage(chatId, "✅ Saved the list successfully", KeyboardBuilder.createFunctionalKeyboard());
+        cndWordList = null;
     }
 }

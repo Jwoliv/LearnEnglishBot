@@ -1,4 +1,4 @@
-package com.example.LearnEnglishBot.model.word.wordList;
+package com.example.LearnEnglishBot.model.wordList;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
 import com.example.LearnEnglishBot.model.user.User;

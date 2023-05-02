@@ -1,7 +1,7 @@
 package com.example.LearnEnglishBot.model.word;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
-import com.example.LearnEnglishBot.model.word.wordList.WordList;
+import com.example.LearnEnglishBot.model.wordList.WordList;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class Word implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String engWord;
+    private String sourceWord;
     private String translateWord;
     private Boolean isLearned;
     @ManyToOne(fetch = FetchType.LAZY)

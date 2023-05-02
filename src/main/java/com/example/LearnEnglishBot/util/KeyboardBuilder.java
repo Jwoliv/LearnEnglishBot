@@ -1,7 +1,7 @@
 package com.example.LearnEnglishBot.util;
 
 import com.example.LearnEnglishBot.model.user.User;
-import com.example.LearnEnglishBot.model.word.wordList.WordList;
+import com.example.LearnEnglishBot.model.wordList.WordList;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;

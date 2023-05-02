@@ -1,4 +1,4 @@
-package com.example.LearnEnglishBot.model.word.wordList;
+package com.example.LearnEnglishBot.model.wordList;
 
 public enum ConditionWordList {
     SELECT_ALL,

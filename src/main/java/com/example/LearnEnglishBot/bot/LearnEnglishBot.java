@@ -1,8 +1,9 @@
 package com.example.LearnEnglishBot.bot;
 
+import com.example.LearnEnglishBot.handlers.CommandHandler;
 import com.example.LearnEnglishBot.handlers.UserAuthHandler;
+import com.example.LearnEnglishBot.handlers.WordHandler;
 import com.example.LearnEnglishBot.handlers.WordListHandler;
-import com.example.LearnEnglishBot.model.user.ConditionAuth;
 import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
@@ -17,14 +18,19 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class LearnEnglishBot extends TelegramLongPollingBot {
     private final UserAuthHandler authHandler;
     private final WordListHandler wordListHandler;
+    private final CommandHandler cmdHandler;
+    private final WordHandler wordHandler;
+
 
     private final UserService userService;
     private MessageSender msgSender;
 
-    public LearnEnglishBot(UserService userService, UserAuthHandler authHandler, WordListHandler wordListHandler) {
+    public LearnEnglishBot(UserService userService, UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler) {
         this.userService = userService;
         this.authHandler = authHandler;
         this.wordListHandler = wordListHandler;
+        this.cmdHandler = cmdHandler;
+        this.wordHandler = wordHandler;
     }
 
     @Autowired
@@ -40,19 +46,10 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
             String text = msg.getText();
             long chatId = msg.getChatId();
             if (text.equals("/start")) {
-                if (userService.findByChatId(chatId) != null) {
-                    msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning English words.\n📖 Here, you can add new words and learn them.");
-                    msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-                    authHandler.setCndAuth(ConditionAuth.FINISH);
-                } else {
-                    msgSender.sendMessage(chatId, """
-                                    👋 Hi! I'm a bot for learning English words.
-                                    📖 Here, you can add new words and learn them.
-                                    ❗You need to authorized in the system
-                                    """,
-                            KeyboardBuilder.createAccountKeyboard()
-                    );
-                }
+                cmdHandler.startMessage(chatId);
+            }
+            else if (text.equals("/reset")) {
+                resetTrackingStatus(chatId);
             }
             else {
                 if (text.equals("Login") || text.equals("Sing in")) {
@@ -69,6 +66,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 }
                 else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
                     wordListHandler.activeWithList(chatId, text);
+                }
+                else if (wordHandler.getCndWord() != null || text.equals("🆕 New word")) {
+                    wordHandler.activeWord(chatId, text);
                 }
                 else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
                     authHandler.handleSignUpInput(chatId, text);
@@ -90,4 +90,10 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
         return "6222379522:AAEBvxLMf7xhpo1qzqiH3IomWhPLa2aiI40";
     }
 
+    public void resetTrackingStatus(Long chatId) {
+        wordListHandler.setCndWordList(null);
+        wordHandler.setCndWord(null);
+        authHandler.setCndAuth(null);
+        msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
+    }
 }

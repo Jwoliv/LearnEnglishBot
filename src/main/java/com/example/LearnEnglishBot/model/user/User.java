@@ -1,7 +1,7 @@
 package com.example.LearnEnglishBot.model.user;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
-import com.example.LearnEnglishBot.model.word.wordList.WordList;
+import com.example.LearnEnglishBot.model.wordList.WordList;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Component;

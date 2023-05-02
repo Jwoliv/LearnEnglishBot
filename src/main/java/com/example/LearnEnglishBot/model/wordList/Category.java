@@ -1,4 +1,4 @@
-package com.example.LearnEnglishBot.model.word.wordList;
+package com.example.LearnEnglishBot.model.wordList;
 
 public enum Category {
     CATEGORY_ONE("Category one"),

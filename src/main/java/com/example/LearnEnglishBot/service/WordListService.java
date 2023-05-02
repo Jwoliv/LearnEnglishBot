@@ -1,9 +1,9 @@
 package com.example.LearnEnglishBot.service;
 
 import com.example.LearnEnglishBot.model.user.User;
-import com.example.LearnEnglishBot.model.word.wordList.Category;
-import com.example.LearnEnglishBot.model.word.wordList.EnglishLevel;
-import com.example.LearnEnglishBot.model.word.wordList.WordList;
+import com.example.LearnEnglishBot.model.wordList.Category;
+import com.example.LearnEnglishBot.model.wordList.EnglishLevel;
+import com.example.LearnEnglishBot.model.wordList.WordList;
 import com.example.LearnEnglishBot.repository.WordListRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

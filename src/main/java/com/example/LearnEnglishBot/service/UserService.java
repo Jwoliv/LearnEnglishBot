@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserService extends BaseService<User, UserRepository> {
@@ -52,6 +53,10 @@ public class UserService extends BaseService<User, UserRepository> {
             return true;
         }
         return false;
+    }
+
+    public List<User> findTop20Users() {
+        return repository.findTop20Users();
     }
 
 }

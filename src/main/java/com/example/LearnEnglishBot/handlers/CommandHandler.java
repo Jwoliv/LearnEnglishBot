@@ -26,7 +26,7 @@ public class CommandHandler {
 
     public void startMessage(Long chatId) {
         if (userService.findByChatId(chatId) != null) {
-            msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning English words.\n📖 Here, you can add new words and learn them.");
+            msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning new words.\n📖 Here, you can add new words and learn them.");
             msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
             authHandler.setCndAuth(ConditionAuth.FINISH);
         } else {

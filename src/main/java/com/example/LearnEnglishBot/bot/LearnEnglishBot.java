@@ -1,9 +1,6 @@
 package com.example.LearnEnglishBot.bot;
 
-import com.example.LearnEnglishBot.handlers.CommandHandler;
-import com.example.LearnEnglishBot.handlers.UserAuthHandler;
-import com.example.LearnEnglishBot.handlers.WordHandler;
-import com.example.LearnEnglishBot.handlers.WordListHandler;
+import com.example.LearnEnglishBot.handlers.*;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +16,15 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private final WordListHandler wordListHandler;
     private final CommandHandler cmdHandler;
     private final WordHandler wordHandler;
+    private final ProfileHandler profileHandler;
     private MessageSender msgSender;
 
-    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler) {
+    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler) {
         this.authHandler = authHandler;
         this.wordListHandler = wordListHandler;
         this.cmdHandler = cmdHandler;
         this.wordHandler = wordHandler;
+        this.profileHandler = profileHandler;
     }
 
     @Autowired
@@ -55,11 +54,14 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 else if (text.equals("📚 All lists")) {
                     wordListHandler.handlerGetAllListsByUser(chatId);
                 }
-                else if (text.equals("🗑️ Delete list")) {
-                    wordListHandler.handlerDeleteSelectedList(chatId);
+                else if (text.equals("🗑️ Delete list") || text.equals("❌ Delete all lists")) {
+                    wordListHandler.activeWithDeleteList(chatId, text);
                 }
-                else if (text.equals("❌ Delete all lists")) {
-                    wordListHandler.handlerDeleteAllList(chatId);
+                else if (text.equals("👤 Profile")) {
+                    profileHandler.profileAnswer(chatId);
+                }
+                else if (text.equals("💪 Top 20")) {
+                    profileHandler.profileTop20Users(chatId);
                 }
                 else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
                     wordListHandler.activeWithList(chatId, text);

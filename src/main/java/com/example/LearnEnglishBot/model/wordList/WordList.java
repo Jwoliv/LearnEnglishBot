@@ -1,6 +1,7 @@
 package com.example.LearnEnglishBot.model.wordList;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
+import com.example.LearnEnglishBot.model.test.Test;
 import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.model.word.Word;
 import jakarta.persistence.*;
@@ -25,6 +26,9 @@ public class WordList implements BaseEntity {
     @OneToMany(mappedBy = "wordList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Word> words = new ArrayList<>();
+    @OneToMany(mappedBy = "wordList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Test> tests = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     private User user;

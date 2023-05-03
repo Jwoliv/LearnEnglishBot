@@ -1,6 +1,7 @@
 package com.example.LearnEnglishBot.model.user;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
+import com.example.LearnEnglishBot.model.test.Test;
 import com.example.LearnEnglishBot.model.word.Word;
 import com.example.LearnEnglishBot.model.wordList.WordList;
 import jakarta.persistence.*;
@@ -26,6 +27,7 @@ public class User implements BaseEntity {
     private String username;
     private String password;
     private Long chatId;
+    private Float reputation;
     private LocalDateTime registrationTime;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -33,4 +35,7 @@ public class User implements BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Word> words = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Test> tests = new ArrayList<>();
 }

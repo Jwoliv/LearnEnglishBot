@@ -112,6 +112,7 @@ public class WordHandler {
             if (word != null) {
                 wordService.deleteById(word.getId());
                 msgSender.sendMessage(chatId, "🗑️ Word deleted successfully", KeyboardBuilder.createFunctionalKeyboard());
+                cndWord = null;
             }
             else {
                 msgSender.sendMessage(chatId, "🤔 This word isn't exist in this list\n✍️ Please try selected correct word", KeyboardBuilder.createKeyboardOfWordsOfUser(user, titleList));
@@ -151,6 +152,7 @@ public class WordHandler {
         var user = userService.findByChatId(chatId);
         var list = wordListService.findByTitleAndUser(titleOfList, user);
         if (list != null) {
+            word.setId(null);
             word.setWordList(list);
             word.setIsLearned(false);
             word.setUser(user);

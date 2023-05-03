@@ -42,7 +42,7 @@ public class KeyboardBuilder {
         row2.add("❌ Delete all lists");
         keyboard.add(row2);
         var row3 = new KeyboardRow();
-        row3.add("✅ Learned word");
+        row3.add("💪 Top 20");
         row3.add("📝 Take test");
         row3.add("👤 Profile");
         keyboard.add(row3);

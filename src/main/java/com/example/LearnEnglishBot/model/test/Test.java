@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Data
 @Builder
@@ -24,12 +22,13 @@ public class Test implements BaseEntity {
     private WordList wordList;
     private Integer numberOfCorrect;
     private Integer numberOfWrong;
-    private LocalDateTime startTime;
-    private LocalDateTime finishTime;
+    @Enumerated(EnumType.STRING)
+    private TypeTest typeTest;
     @ManyToOne
     private User user;
 
-    public int getRating() {
-        return (numberOfCorrect * (numberOfCorrect + numberOfCorrect)) / 100;
+    public int getAssessment() {
+        var mainSize = wordList.getWords().size();
+        return (numberOfCorrect * 100) / mainSize;
     }
 }

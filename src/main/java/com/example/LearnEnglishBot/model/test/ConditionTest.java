@@ -1,8 +1,11 @@
 package com.example.LearnEnglishBot.model.test;
 
 public enum ConditionTest {
-    TEST_NONE,
-    TEST_SELECTED_LIST,
-    TEST_LIST_ITERATION,
-
+    NONE,
+    SELECT_LIST,
+    SELECT_TYPE,
+    LIST_ITERATION,
+    ITEM_SOURCE_WORD,
+    ITEM_TRANSACTION_WORD,
+    WAIT_FOR_CONFIRM_MSG
 }

@@ -17,14 +17,16 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private final CommandHandler cmdHandler;
     private final WordHandler wordHandler;
     private final ProfileHandler profileHandler;
+    private final TestHandler testHandler;
     private MessageSender msgSender;
 
-    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler) {
+    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler, TestHandler testHandler) {
         this.authHandler = authHandler;
         this.wordListHandler = wordListHandler;
         this.cmdHandler = cmdHandler;
         this.wordHandler = wordHandler;
         this.profileHandler = profileHandler;
+        this.testHandler = testHandler;
     }
 
     @Autowired
@@ -63,6 +65,9 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 else if (text.equals("💪 Top 20")) {
                     profileHandler.profileTop20Users(chatId);
                 }
+                else if (testHandler.getCndTest() != null || text.equals("📝 Take test")) {
+                    testHandler.activeTest(chatId, text);
+                }
                 else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
                     wordListHandler.activeWithList(chatId, text);
                 }
@@ -90,6 +95,7 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     }
 
     public void resetTrackingStatus() {
+        testHandler.setCndTest(null);
         wordListHandler.setCndWordList(null);
         wordHandler.setCndWord(null);
         authHandler.setCndAuth(null);

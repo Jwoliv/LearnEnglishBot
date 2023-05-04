@@ -65,7 +65,7 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 else if (text.equals("💪 Top 20")) {
                     profileHandler.profileTop20Users(chatId);
                 }
-                else if (testHandler.getCndTest() != null || text.equals("📝 Take test")) {
+                else if (testHandler.getCndTest() != null || text.equals("📝 Take test") || text.equals("📊 All tests")) {
                     testHandler.activeTest(chatId, text);
                 }
                 else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {

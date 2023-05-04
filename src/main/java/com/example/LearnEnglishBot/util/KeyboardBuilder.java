@@ -46,6 +46,9 @@ public class KeyboardBuilder {
         row3.add("📝 Take test");
         row3.add("👤 Profile");
         keyboard.add(row3);
+        var row4 = new KeyboardRow();
+        row4.add("📊 All tests");
+        keyboard.add(row4);
         keyboardMarkup.setKeyboard(keyboard);
 
         return keyboardMarkup;
@@ -115,6 +118,33 @@ public class KeyboardBuilder {
 
         for (var word : selectedWordList.getWords()) {
             KeyboardButton button = new KeyboardButton(word.getSourceWord() + " - " + word.getTranslateWord());
+            KeyboardRow row = new KeyboardRow();
+            row.add(button);
+            keyboardRows.add(row);
+        }
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+
+        return keyboardMarkup;
+    }
+
+    public static ReplyKeyboardMarkup createKeyboardOfTests(User user) {
+        var tests = user.getTests();
+
+
+        var keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setSelective(true);
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        for (var test : tests) {
+            KeyboardButton button = new KeyboardButton(
+                    test.getId() + ") " +
+                    FormatTime.formattedTime(test.getStartTime()) + " - " +
+                    FormatTime.formattedTime(test.getFinishTime()));
+
             KeyboardRow row = new KeyboardRow();
             row.add(button);
             keyboardRows.add(row);

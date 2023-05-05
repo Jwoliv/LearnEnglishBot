@@ -11,7 +11,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -22,6 +26,10 @@ public class WordListHandler {
     private Category category;
     private EnglishLevel engLvl;
     private AccessLevel accessLevel;
+    private Integer number;
+    private String username;
+    private List<WordList> wordLists;
+    private WordList selectedList;
 
     private ConditionWordList cndWordList;
     private final UserService userService;
@@ -43,25 +51,96 @@ public class WordListHandler {
         if (text.equals("🆕 New list")) {
             handleNameOfList(chatId);
         }
-        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_NAME)) {
+        else if (text.equals("👀 Find lists")) {
+            cndWordList = ConditionWordList.WAIT_FOR_CATEGORY_OF_SUGGESTED_TEST;
+            msgSender.sendMessage(chatId, "Select category of lists:", KeyboardBuilder.createKeyboardOfEnum(Category.class));
+        }
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_CATEGORY_OF_SUGGESTED_TEST)) {
+            category = Category.valueOf(text);
+            cndWordList = ConditionWordList.WAIT_FOR_NUMBER_OF_LIST;
+            msgSender.sendMessage(chatId, "Enter a number of suggested lists: ");
+        }
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_NUMBER_OF_LIST)) {
+            number = Integer.valueOf(text);
+            var user = userService.findByChatId(chatId);
+            wordLists = wordListService.findSuggestedOfList(category);
+            wordLists.removeAll(user.getWordLists());
+            if (wordLists.size() > number) {
+                wordLists.subList(0, number);
+            }
+            if (wordLists.size() > 0) {
+                msgSender.sendMessage(chatId, "Select the list", KeyboardBuilder.createKeyboardOfWordListOfUser(wordLists));
+                cndWordList = ConditionWordList.WAIT_FOR_SELECT_LIST;
+            }
+        }
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_SELECT_LIST)) {
+            selectedList = wordLists.stream().filter(x -> x.getTitle().equals(text)).findFirst().orElse(null);
+            if (selectedList != null) {
+                msgSender.sendMessage(chatId, "What do you want to do?", new ReplyKeyboardMarkup(
+                        Collections.singletonList(
+                                new KeyboardRow(List.of(new KeyboardButton("Add"), new KeyboardButton("Pass")))
+                        )
+                ));
+                cndWordList = ConditionWordList.SELECTED_LIST_FOR_ACTIVITY;
+            }
+        }
+
+        else if (cndWordList.equals(ConditionWordList.SELECTED_LIST_FOR_ACTIVITY)) {
+            if (text.equals("Add")) {
+                var currentUser = userService.findByChatId(chatId);
+                var size = selectedList.getWords().size();
+                if (size > 0) {
+                    if (!selectedList.getUser().getId().equals(currentUser.getId())) {
+                        var list = WordList.builder()
+                                .id(null)
+                                .title(selectedList.getTitle())
+                                .user(currentUser)
+                                .reputation(0.0F)
+                                .englishLevel(selectedList.getEnglishLevel())
+                                .accessLevel(selectedList.getAccessLevel())
+                                .category(selectedList.getCategory())
+                                .build();
+
+                        var words = selectedList.getWords();
+                        wordListService.save(list);
+                        words.forEach(x -> { x.setId(null); x.setWordList(list);});
+                        list.setWords(words);
+                        wordListService.save(list);
+                        msgSender.sendMessage(chatId, "Add list to your lists", KeyboardBuilder.createFunctionalKeyboard());
+                    }
+                    else {
+                        msgSender.sendMessage(chatId, "Sorry you can't save your own list", KeyboardBuilder.createFunctionalKeyboard());
+                    }
+                }
+                else {
+                    msgSender.sendMessage(chatId, "This list is empty", KeyboardBuilder.createFunctionalKeyboard());
+                }
+            }
+            else if (text.equals("Pass")) {
+                msgSender.sendMessage(chatId, "Main functional of this bot", KeyboardBuilder.createFunctionalKeyboard());
+            }
+            cndWordList = null;
+        }
+
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_NAME)) {
             handleCategoryOfList(chatId, text);
         }
-        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_CATEGORY)) {
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_CATEGORY)) {
             handlerEnglishLevel(chatId, Category.valueOf(text));
         }
-        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_ENGLISH_LEVEL)) {
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_ENGLISH_LEVEL)) {
             handlerAccessLevel(chatId, EnglishLevel.valueOf(text));
         }
-        else if (getCndWordList().equals(ConditionWordList.WAIT_FOR_ACCESS_LEVEL)) {
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_ACCESS_LEVEL)) {
             finallyCreatedListOfWords(chatId, AccessLevel.valueOf(text));
         }
-        else if (getCndWordList().equals(ConditionWordList.DELETE_LIST) && userService.findByChatId(chatId).getWordLists().stream().map(WordList::getTitle).toList().contains(text)) {
+        else if (cndWordList.equals(ConditionWordList.DELETE_LIST) && userService.findByChatId(chatId).getWordLists().stream().map(WordList::getTitle).toList().contains(text)) {
             deleteList(chatId, text);
         }
-        else if (getCndWordList().equals(ConditionWordList.DELETE_ALL)) {
+        else if (cndWordList.equals(ConditionWordList.DELETE_ALL)) {
             deleteAllListByUser(chatId, text);
         }
-        else if (getCndWordList().equals(ConditionWordList.SELECT_ALL)) {
+        else if (cndWordList.equals(ConditionWordList.SELECT_ALL)) {
             selectedWordsOfList(chatId, text);
         }
     }
@@ -69,7 +148,7 @@ public class WordListHandler {
     public void handlerGetAllListsByUser(Long chatId) {
         if (userService.findByChatId(chatId).getWordLists().size() != 0) {
             cndWordList = ConditionWordList.SELECT_ALL;
-            msgSender.sendMessage(chatId, "📚 Your lists of words", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId)));
+            msgSender.sendMessage(chatId, "📚 Your lists of words", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId).getWordLists()));
         }
         else {
             msgSender.sendMessage(chatId, "📚 Your collection of lists is empty", KeyboardBuilder.createFunctionalKeyboard());
@@ -91,38 +170,18 @@ public class WordListHandler {
         var user = userService.findByChatId(chatId);
         var list = wordListService.findByTitleAndUser(text, user);
         if (list != null) {
-            var sb = new StringBuilder();
-            var size = list.getWords().size();
-            sb.append(String.format("""
-                    📜 List: %s
-                    📈 Number of words: %d
-                    🔑 Access level: %s
-                    🔤 English level: %s
-                    🗂️ Category: %s\n\n
-                    """, list.getTitle(), size, list.getAccessLevel().getDisplayName(), list.getEnglishLevel(), list.getCategory().getDisplayName()
-            ));
-
-            if (size > 0) {
-                sb.append(" 📊 Words of the list:\n");
-                for (var word : list.getWords()) {
-                    sb.append(word.getSourceWord()).append(" - ").append(word.getTranslateWord()).append("\n");
-                }
-            }
-            else {
-                sb.append("🔍 This list is empty");
-            }
-            msgSender.sendMessage(chatId, sb.toString(), KeyboardBuilder.createFunctionalKeyboard());
-            cndWordList = null;
+            String str = sendMessageOfList(list);
+            msgSender.sendMessage(chatId, str, KeyboardBuilder.createFunctionalKeyboard());
         }
         else {
-            msgSender.sendMessage(chatId, "Please enter a correct title of the list", KeyboardBuilder.createKeyboardOfWordListOfUser(user));
+            msgSender.sendMessage(chatId, "Please enter a correct title of the list", KeyboardBuilder.createKeyboardOfWordListOfUser(user.getWordLists()));
         }
     }
 
     private void handlerDeleteSelectedList(Long chatId) {
         if (userService.findByChatId(chatId).getWordLists().size() != 0) {
             setCndWordList(ConditionWordList.DELETE_LIST);
-            msgSender.sendMessage(chatId, "📚 Your lists of words", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId)));
+            msgSender.sendMessage(chatId, "📚 Your lists of words", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId).getWordLists()));
         }
         else {
             msgSender.sendMessage(chatId, "📚 Your collection of lists is empty", KeyboardBuilder.createFunctionalKeyboard());
@@ -221,4 +280,32 @@ public class WordListHandler {
         msgSender.sendMessage(chatId, "✅ Saved the list successfully", KeyboardBuilder.createFunctionalKeyboard());
         cndWordList = null;
     }
+
+    private String sendMessageOfList(WordList list) {
+        var sb = new StringBuilder();
+        var size = list.getWords().size();
+        sb.append(String.format("""
+                    📜 List: %s
+                    📈 Number of words: %d
+                    🔑 Access level: %s
+                    🔤 English level: %s
+                    🗂️ Category: %s
+                    
+                    
+                    """, list.getTitle(), size, list.getAccessLevel().getDisplayName(), list.getEnglishLevel(), list.getCategory().getDisplayName()
+        ));
+
+        if (size > 0) {
+            sb.append(" 📊 Words of the list:\n");
+            for (var word : list.getWords()) {
+                sb.append(word.getSourceWord()).append(" - ").append(word.getTranslateWord()).append("\n");
+            }
+        }
+        else {
+            sb.append("🔍 This list is empty");
+        }
+        cndWordList = null;
+        return sb.toString();
+    }
+
 }

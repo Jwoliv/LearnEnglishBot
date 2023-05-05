@@ -39,6 +39,7 @@ public class UserService extends BaseService<User, UserRepository> {
                 .password(hashedPassword)
                 .chatId(chatId)
                 .registrationTime(LocalDateTime.now())
+                .reputation(0.0F)
                 .build();
         save(newUser);
     }

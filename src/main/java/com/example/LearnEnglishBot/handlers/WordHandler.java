@@ -72,7 +72,7 @@ public class WordHandler {
             cndWord = ConditionWord.SELECTED_LIST_FOR_DELETE;
             msgSender.sendMessage(chatId,
                     "📋 Select the list from which you want to remove word",
-                    KeyboardBuilder.createKeyboardOfWordListOfUser(user)
+                    KeyboardBuilder.createKeyboardOfWordListOfUser(user.getWordLists())
             );
         }
         else {
@@ -145,7 +145,7 @@ public class WordHandler {
     private void handleListForWord(Long chatId, String translateWord) {
         word.setTranslateWord(translateWord);
         cndWord = ConditionWord.WAIT_FOR_LIST_OF_WORD;
-        msgSender.sendMessage(chatId, "📋 Enter a list of word", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId)));
+        msgSender.sendMessage(chatId, "📋 Enter a list of word", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId).getWordLists()));
     }
 
     private void finallyCreatedWord(Long chatId, String titleOfList) {
@@ -161,7 +161,7 @@ public class WordHandler {
             cndWord = null;
         }
         else {
-            msgSender.sendMessage(chatId, "📋 Enter a list of word", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId)));
+            msgSender.sendMessage(chatId, "📋 Enter a list of word", KeyboardBuilder.createKeyboardOfWordListOfUser(userService.findByChatId(chatId).getWordLists()));
         }
     }
 }

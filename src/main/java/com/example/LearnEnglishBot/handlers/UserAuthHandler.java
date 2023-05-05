@@ -62,7 +62,7 @@ public class UserAuthHandler {
             userService.singIn(username, password, chatId);
             msgSender.sendMessage(chatId, "✅ User saved successfully");
             msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-            cndAuth = ConditionAuth.FINISH;
+            cndAuth = null;
         }
     }
 
@@ -84,7 +84,7 @@ public class UserAuthHandler {
             if (isLogin) {
                 msgSender.sendMessage(chatId, "✅ User login successful");
                 msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-                cndAuth = ConditionAuth.FINISH;
+                cndAuth = null;
             }
             else {
                 msgSender.sendMessage(chatId, "❌ Wrong password please try again");

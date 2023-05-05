@@ -258,11 +258,11 @@ public class TestHandler {
                 msgSender.sendMessage(chatId, "📝 Selected the type of test", KeyboardBuilder.createKeyboardOfEnum(TypeTest.class));
             }
             else {
-                msgSender.sendMessage(chatId, "🗒️ List is empty\nPlease try again", KeyboardBuilder.createKeyboardOfWordListOfUser(user));
+                msgSender.sendMessage(chatId, "🗒️ List is empty\nPlease try again", KeyboardBuilder.createKeyboardOfWordListOfUser(user.getWordLists()));
             }
         }
         else {
-            msgSender.sendMessage(chatId, "🤔 Wrong title of list\nPlease try again", KeyboardBuilder.createKeyboardOfWordListOfUser(user));
+            msgSender.sendMessage(chatId, "🤔 Wrong title of list\nPlease try again", KeyboardBuilder.createKeyboardOfWordListOfUser(user.getWordLists()));
         }
     }
 
@@ -270,7 +270,7 @@ public class TestHandler {
         cndTest = ConditionTest.SELECT_LIST;
         var user = userService.findByChatId(chatId);
         if (user.getWords().size() > 0) {
-            msgSender.sendMessage(chatId, "🔍 Select the list for test", KeyboardBuilder.createKeyboardOfWordListOfUser(user));
+            msgSender.sendMessage(chatId, "🔍 Select the list for test", KeyboardBuilder.createKeyboardOfWordListOfUser(user.getWordLists()));
         }
         else {
             msgSender.sendMessage(chatId, "😕 You don't have any words", KeyboardBuilder.createFunctionalKeyboard());

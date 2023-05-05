@@ -24,6 +24,7 @@ public class KeyboardBuilder {
         keyboard.setKeyboard(rows);
         return keyboard;
     }
+
     public static ReplyKeyboardMarkup createFunctionalKeyboard() {
         var keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setOneTimeKeyboard(true);
@@ -48,11 +49,14 @@ public class KeyboardBuilder {
         keyboard.add(row3);
         var row4 = new KeyboardRow();
         row4.add("📊 All tests");
+        row4.add("👀 Find lists");
+        row4.add("🗑️ Delete profile");
         keyboard.add(row4);
         keyboardMarkup.setKeyboard(keyboard);
 
         return keyboardMarkup;
     }
+
     public static <E extends Enum<E>> ReplyKeyboardMarkup createKeyboardOfEnum(Class<E> enumClass) {
         var keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setOneTimeKeyboard(true);
@@ -77,8 +81,8 @@ public class KeyboardBuilder {
 
         return keyboardMarkup;
     }
-    public static ReplyKeyboardMarkup createKeyboardOfWordListOfUser(User user) {
-        var wordLists = user.getWordLists();
+
+    public static ReplyKeyboardMarkup createKeyboardOfWordListOfUser(List<WordList> wordLists) {
 
         var keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setOneTimeKeyboard(true);

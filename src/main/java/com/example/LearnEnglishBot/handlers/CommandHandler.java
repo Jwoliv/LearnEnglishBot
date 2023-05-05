@@ -1,6 +1,5 @@
 package com.example.LearnEnglishBot.handlers;
 
-import com.example.LearnEnglishBot.model.user.ConditionAuth;
 import com.example.LearnEnglishBot.service.UserService;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
@@ -28,7 +27,7 @@ public class CommandHandler {
         if (userService.findByChatId(chatId) != null) {
             msgSender.sendMessage(chatId, "👋 Hi! I'm a bot for learning new words.\n📖 Here, you can add new words and learn them.");
             msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-            authHandler.setCndAuth(ConditionAuth.FINISH);
+            authHandler.setCndAuth(null);
         } else {
             msgSender.sendMessage(chatId, """
                                     👋 Hi! I'm a bot for learning English words.

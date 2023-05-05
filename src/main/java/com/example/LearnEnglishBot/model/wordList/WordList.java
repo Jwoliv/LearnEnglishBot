@@ -32,6 +32,7 @@ public class WordList implements BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     private User user;
+    private Float reputation;
     @Enumerated(EnumType.STRING)
     private AccessLevel accessLevel;
     @Enumerated(EnumType.STRING)

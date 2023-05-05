@@ -1,6 +1,7 @@
 package com.example.LearnEnglishBot.bot;
 
 import com.example.LearnEnglishBot.handlers.*;
+import com.example.LearnEnglishBot.model.user.ConditionAuth;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,12 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 else if (text.equals("💪 Top 20")) {
                     profileHandler.profileTop20Users(chatId);
                 }
+                else if (text.equals("🗑️ Delete profile") || profileHandler.getCndAuth() != null && profileHandler.getCndAuth().equals(ConditionAuth.DELETE_USER)) {
+                    profileHandler.processingOfDeleteUser(chatId, text);
+                }
+                else if (text.equals("👀 Find lists")) {
+                    wordListHandler.activeWithList(chatId, text);
+                }
                 else if (testHandler.getCndTest() != null || text.equals("📝 Take test") || text.equals("📊 All tests")) {
                     testHandler.activeTest(chatId, text);
                 }
@@ -99,5 +106,6 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
         wordListHandler.setCndWordList(null);
         wordHandler.setCndWord(null);
         authHandler.setCndAuth(null);
+        profileHandler.setCndAuth(null);
     }
 }

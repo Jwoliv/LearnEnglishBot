@@ -34,4 +34,7 @@ public class WordListService extends BaseService<WordList, WordListRepository> {
         repository.deleteAllByUser(user);
     }
 
+    public List<WordList> findSuggestedOfList(Category category) {
+        return repository.findSuggestedOfList(category);
+    }
 }

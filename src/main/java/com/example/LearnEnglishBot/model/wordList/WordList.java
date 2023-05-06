@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @ToString
 @Component
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class WordList implements BaseEntity {

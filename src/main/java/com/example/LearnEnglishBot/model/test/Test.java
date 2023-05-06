@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @Component
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class Test implements BaseEntity {

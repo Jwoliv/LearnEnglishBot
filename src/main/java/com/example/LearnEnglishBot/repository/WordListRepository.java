@@ -16,6 +16,6 @@ public interface WordListRepository extends BaseRepository<WordList> {
     void deleteAllByUser(User user);
     List<WordList> findByUser(User user);
     List<WordList> findByCategoryAndEnglishLevel(Category category, EnglishLevel englishLevel);
-    @Query("SELECT WL FROM WordList AS WL WHERE WL.category = :category ORDER BY WL.reputation")
-    List<WordList> findSuggestedOfList(@Param("category") Category category);
+    @Query("SELECT WL FROM WordList AS WL WHERE WL.category = :category AND WL.accessLevel = 'PUBLIC' AND WL.user.id != :id ORDER BY WL.reputation")
+    List<WordList> findSuggestedOfList(@Param("category") Category category, @Param("id") Long id);
 }

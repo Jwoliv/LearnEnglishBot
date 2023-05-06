@@ -4,16 +4,14 @@ import com.example.LearnEnglishBot.model.BaseEntity;
 import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.model.wordList.WordList;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
 @Entity
 @Data
 @Component
 @ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class Word implements BaseEntity {

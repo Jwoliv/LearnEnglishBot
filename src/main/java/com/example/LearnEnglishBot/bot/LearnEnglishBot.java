@@ -19,6 +19,8 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private final WordHandler wordHandler;
     private final ProfileHandler profileHandler;
     private final TestHandler testHandler;
+
+
     private MessageSender msgSender;
 
     public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler, TestHandler testHandler) {

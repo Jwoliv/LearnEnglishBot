@@ -53,7 +53,7 @@ public class ProfileHandler {
               
                📊 Number of lists: %d
                📝 Number of words: %d
-               ⭐️ Reputation: %.2f
+               ⭐️ Reputation: %.1f
                 """, user.getId(), user.getUsername(), numberOfLists, numberOfWords, user.getReputation());
         msgSender.sendMessage(chatId, answer, KeyboardBuilder.createFunctionalKeyboard());
     }

@@ -30,6 +30,7 @@ public class WordListHandler {
     private String username;
     private List<WordList> wordLists;
     private WordList selectedList;
+    private String newTitle;
 
     private ConditionWordList cndWordList;
     private final UserService userService;
@@ -53,7 +54,7 @@ public class WordListHandler {
         }
         else if (text.equals("👀 Find lists")) {
             cndWordList = ConditionWordList.WAIT_FOR_CATEGORY_OF_SUGGESTED_TEST;
-            msgSender.sendMessage(chatId, "Select category of lists:", KeyboardBuilder.createKeyboardOfEnum(Category.class));
+            msgSender.sendMessage(chatId, "👀 Select category of lists:", KeyboardBuilder.createKeyboardOfEnum(Category.class));
         }
         else if (cndWordList.equals(ConditionWordList.WAIT_FOR_CATEGORY_OF_SUGGESTED_TEST)) {
             handleCategoryOfSuggestedList(chatId, text);
@@ -63,6 +64,9 @@ public class WordListHandler {
         }
         else if (cndWordList.equals(ConditionWordList.WAIT_FOR_SELECT_LIST)) {
             handleSelectedList(chatId, text);
+        }
+        else if (cndWordList.equals(ConditionWordList.WAIT_FOR_TITLE_OF_ADDED_LIST)) {
+            handleNewTitleOfList(chatId, text);
         }
         else if (cndWordList.equals(ConditionWordList.SELECTED_LIST_FOR_ACTIVITY)) {
             activeWithSuggestedList(chatId, text);
@@ -111,6 +115,15 @@ public class WordListHandler {
 
 
 
+    private void handleNewTitleOfList(Long chatId, String text) {
+        newTitle = text;
+        msgSender.sendMessage(chatId, "❓ What do you want to do?", new ReplyKeyboardMarkup(
+                Collections.singletonList(
+                        new KeyboardRow(List.of(new KeyboardButton("Add"), new KeyboardButton("Pass")))
+                )
+        ));
+        cndWordList = ConditionWordList.SELECTED_LIST_FOR_ACTIVITY;
+    }
     private void handleNumberOfSuggestedList(Long chatId, String text) {
         try {
             number = Integer.valueOf(text);
@@ -143,11 +156,10 @@ public class WordListHandler {
             var size = selectedList.getWords().size();
             if (size > 0) {
                 if (!selectedList.getUser().getId().equals(currentUser.getId())) {
-                    var title = selectedList.getTitle() + "_" + currentUser.getUsername();
-                    if (currentUser.getWordLists().stream().noneMatch(x -> x.getTitle().equals(title))) {
+                    if (currentUser.getWordLists().stream().noneMatch(x -> x.getTitle().equals(newTitle))) {
                         var list = WordList.builder()
                                 .id(null)
-                                .title(title)
+                                .title(newTitle)
                                 .user(currentUser)
                                 .reputation(0.0F)
                                 .englishLevel(selectedList.getEnglishLevel())
@@ -156,9 +168,14 @@ public class WordListHandler {
                                 .build();
 
                         selectedList.setReputation(selectedList.getReputation() + 0.1F);
+                        wordListService.save(selectedList);
+                        var ownerOfList = selectedList.getUser();
+                        ownerOfList.setReputation(ownerOfList.getReputation() + 0.1F);
+                        userService.save(ownerOfList);
+
                         var words = selectedList.getWords();
                         wordListService.save(list);
-                        words.forEach(x -> { x.setId(null); x.setWordList(list);});
+                        words.forEach(x -> { x.setId(null); x.setWordList(list); x.setUser(currentUser);});
                         list.setWords(words);
                         wordListService.save(list);
                         msgSender.sendMessage(chatId, "✅ Add list to your lists", KeyboardBuilder.createFunctionalKeyboard());
@@ -186,13 +203,13 @@ public class WordListHandler {
 
     private void handleSelectedList(Long chatId, String text) {
         selectedList = wordLists.stream().filter(x -> x.getTitle().equals(text)).findFirst().orElse(null);
-        if (selectedList != null) {
-            msgSender.sendMessage(chatId, "❓ What do you want to do?", new ReplyKeyboardMarkup(
-                    Collections.singletonList(
-                            new KeyboardRow(List.of(new KeyboardButton("Add"), new KeyboardButton("Pass")))
-                    )
-            ));
-            cndWordList = ConditionWordList.SELECTED_LIST_FOR_ACTIVITY;
+        if (selectedList != null && selectedList.getWords().size() > 0) {
+            msgSender.sendMessage(chatId, sendMessageOfList(selectedList));
+            msgSender.sendMessage(chatId, "❓ What title do you want to be set for this list?");
+            cndWordList = ConditionWordList.WAIT_FOR_TITLE_OF_ADDED_LIST;
+        }
+        else {
+            msgSender.sendMessage(chatId, "🚫 List is empty or don't has any words", KeyboardBuilder.createKeyboardOfWordListOfUser(wordLists));
         }
     }
 

@@ -16,13 +16,6 @@ public class UserService extends BaseService<User, UserRepository> {
         super(repository);
     }
 
-    @Override
-    public void save(User entity) {
-        if (findByUsername(entity.getUsername()) == null) {
-            super.save(entity);
-        }
-    }
-
     public User findByUsername(String username) {
         return repository.findByUsername(username);
     }
@@ -41,6 +34,7 @@ public class UserService extends BaseService<User, UserRepository> {
                 .registrationTime(LocalDateTime.now())
                 .reputation(0.0F)
                 .build();
+
         save(newUser);
     }
 

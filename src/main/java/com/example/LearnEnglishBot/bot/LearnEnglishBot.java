@@ -44,50 +44,49 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
             Message msg = update.getMessage();
             String text = msg.getText();
             long chatId = msg.getChatId();
-            if (text.equals("/start")) {
-                resetTrackingStatus();
-                cmdHandler.startMessage(chatId);
-            }
-            else if (text.equals("/reset")) {
-                resetTrackingStatus();
-                msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
-            }
-            else {
-                if (text.equals("Login") || text.equals("Sing in")) {
-                    authHandler.handleInitialAuthInput(chatId, text);
+            switch (text) {
+                case "/start" -> {
+                    resetTrackingStatus();
+                    cmdHandler.startMessage(chatId);
                 }
-                else if (text.equals("📚 All lists")) {
-                    wordListHandler.handlerGetAllListsByUser(chatId);
+                case "🆕 New" ->
+                        msgSender.sendMessage(chatId, "🆕 New", KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.newTitles));
+                case "🗑️ Delete" ->
+                        msgSender.sendMessage(chatId, "🗑️ Delete", KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.deleteTitles));
+                case "📚 Social" ->
+                        msgSender.sendMessage(chatId, "📚 Social", KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.socialTitles));
+                case "👤 Account" ->
+                        msgSender.sendMessage(chatId, "👤 Account", KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.accountTitles));
+                case "/reset" -> {
+                    resetTrackingStatus();
+                    msgSender.sendMessage(chatId, "👉 You can use all the cool features of this bot now 😎", KeyboardBuilder.createFunctionalKeyboard());
                 }
-                else if (text.equals("🗑️ Delete list") || text.equals("❌ Delete all lists")) {
-                    wordListHandler.activeWithDeleteList(chatId, text);
-                }
-                else if (text.equals("👤 Profile")) {
-                    profileHandler.profileAnswer(chatId);
-                }
-                else if (text.equals("💪 Top 20")) {
-                    profileHandler.profileTop20Users(chatId);
-                }
-                else if (text.equals("🗑️ Delete profile") || profileHandler.getCndAuth() != null && profileHandler.getCndAuth().equals(ConditionAuth.DELETE_USER)) {
-                    profileHandler.processingOfDeleteUser(chatId, text);
-                }
-                else if (text.equals("👀 Find lists")) {
-                    wordListHandler.activeWithList(chatId, text);
-                }
-                else if (testHandler.getCndTest() != null || text.equals("📝 Take test") || text.equals("📊 All tests")) {
-                    testHandler.activeTest(chatId, text);
-                }
-                else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
-                    wordListHandler.activeWithList(chatId, text);
-                }
-                else if (wordHandler.getCndWord() != null || text.equals("🆕 New word") || text.equals("🗑️ Delete word")) {
-                    wordHandler.activeWord(chatId, text);
-                }
-                else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
-                    authHandler.handleSignUpInput(chatId, text);
-                }
-                else if (authHandler.getCndAuth().toString().startsWith("LOGIN")) {
-                    authHandler.handleLoginInput(chatId, text);
+                default -> {
+                    if (text.equals("Login") || text.equals("Sing in")) {
+                        authHandler.handleInitialAuthInput(chatId, text);
+                    } else if (text.equals("📚 All lists")) {
+                        wordListHandler.handlerGetAllListsByUser(chatId);
+                    } else if (text.equals("🗑️ Delete list") || text.equals("❌ Delete all lists")) {
+                        wordListHandler.activeWithDeleteList(chatId, text);
+                    } else if (text.equals("👤 Profile")) {
+                        profileHandler.profileAnswer(chatId);
+                    } else if (text.equals("💪 Top 20")) {
+                        profileHandler.profileTop20Users(chatId);
+                    } else if (text.equals("🗑️ Delete profile") || profileHandler.getCndAuth() != null && profileHandler.getCndAuth().equals(ConditionAuth.DELETE_USER)) {
+                        profileHandler.processingOfDeleteUser(chatId, text);
+                    } else if (text.equals("👀 Find lists")) {
+                        wordListHandler.activeWithList(chatId, text);
+                    } else if (testHandler.getCndTest() != null || text.equals("📝 Take test") || text.equals("📊 All tests")) {
+                        testHandler.activeTest(chatId, text);
+                    } else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
+                        wordListHandler.activeWithList(chatId, text);
+                    } else if (wordHandler.getCndWord() != null || text.equals("🆕 New word") || text.equals("🗑️ Delete word")) {
+                        wordHandler.activeWord(chatId, text);
+                    } else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
+                        authHandler.handleSignUpInput(chatId, text);
+                    } else if (authHandler.getCndAuth().toString().startsWith("LOGIN")) {
+                        authHandler.handleLoginInput(chatId, text);
+                    }
                 }
             }
         }

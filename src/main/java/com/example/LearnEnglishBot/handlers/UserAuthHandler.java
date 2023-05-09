@@ -41,7 +41,7 @@ public class UserAuthHandler {
                 msgSender.sendMessage(chatId, "🔒 Please enter new username");
             }
             else {
-                msgSender.sendMessage(chatId, "❌ There is already an active user in this session\n🤔 Please try again", KeyboardBuilder.createAccountKeyboard());
+                msgSender.sendMessage(chatId, "❌ There is already an active user in this session\n🤔 Please try again",  KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.authTitles));
             }
         }
     }

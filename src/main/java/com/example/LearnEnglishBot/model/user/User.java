@@ -1,6 +1,7 @@
 package com.example.LearnEnglishBot.model.user;
 
 import com.example.LearnEnglishBot.model.BaseEntity;
+import com.example.LearnEnglishBot.model.notification.Notification;
 import com.example.LearnEnglishBot.model.test.Test;
 import com.example.LearnEnglishBot.model.word.Word;
 import com.example.LearnEnglishBot.model.wordList.WordList;
@@ -39,4 +40,7 @@ public class User implements BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Test> tests = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Notification> notifications = new ArrayList<>();
 }

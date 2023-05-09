@@ -67,76 +67,26 @@ public class TestHandler {
             selectedAllTests(chatId);
         }
         else if (cndTest.equals(ConditionTest.SELECT_ALL)) {
-            var parts = text.split("\\)");
-            var user = userService.findByChatId(chatId);
-            if (parts.length > 0 && parts[0].matches("\\d+")) {
-                var id = Long.parseLong(parts[0]);
-                var test = testService.findById(id).get();
-                if (test.getUser().getId().equals(user.getId())) {
-                    sendMessageAboutTest(chatId, test, new StringBuilder());
-                    cndTest = null;
-                }
-            } else {
-                msgSender.sendMessage(chatId, "Wrong name of test\nTry again", KeyboardBuilder.createKeyboardOfTests(user));
-            }
+            handleSelectedListForTest(chatId, text);
         }
         else if (cndTest.equals(ConditionTest.SELECT_LIST)) {
             selectedListForTest(chatId, text);
         }
         else if (cndTest.equals(ConditionTest.SELECT_TYPE)) {
-            typeTest = TypeTest.valueOf(text);
-            if (typeTest.equals(TypeTest.FLASH_CARD)) {
-                flashCardInstruction(chatId);
-            }
-            else if (typeTest.equals(TypeTest.WRITING_TEST)) {
-                writingTestInstruction(chatId);
-            }
-            startTime = LocalDateTime.now();
+            handleTypeOfTest(chatId, text);
         }
         else if (typeTest.equals(TypeTest.FLASH_CARD)) {
-            if (cndTest.equals(ConditionTest.ITEM_TRANSLATION_WORD)) {
-                if (text.equals("Yup, I know")) {
-                    msgSender.sendMessage(
-                            chatId,
-                            "👀 You translated this word like this: " + selectedWord.getTranslateWord(),
-                            new ReplyKeyboardMarkup(
-                                    List.of(
-                                            new KeyboardRow(Set.of(new KeyboardButton("Yup"))),
-                                            new KeyboardRow(Set.of(new KeyboardButton("Nope")))
-                                    )
-                            ));
-                    cndTest = ConditionTest.WAIT_FOR_CONFIRM_MSG;
-                }
-                else if (text.equals("Nope, don't know")) {
-                    selectedWord.setIsLearned(false);
-                    wordService.save(selectedWord);
-                    msgSender.sendMessage(chatId, "🔍 Translate: " + selectedWord.getTranslateWord());
-                    getMsgOfSourceWord(chatId);
-                }
-            }
-            else if (cndTest.equals(ConditionTest.WAIT_FOR_CONFIRM_MSG)) {
-                confirmTranslate(text);
-                getMsgOfSourceWord(chatId);
-            }
-
-            else if (cndTest.equals(ConditionTest.ITEM_SOURCE_WORD)) {
-                getMsgOfSourceWord(chatId);
-            }
+            processingOfFlashCard(chatId, text);
         }
         else if (typeTest.equals(TypeTest.WRITING_TEST)) {
-            if (cndTest.equals(ConditionTest.ITEM_TRANSLATION_WORD)) {
-                processOfTranslationWord(chatId, text);
-            }
-            else if (cndTest.equals(ConditionTest.ITEM_SOURCE_WORD)) {
-                sendMessageForWordOfWritingTest(chatId);
-            }
+            processingOfWritingTest(chatId, text);
         }
     }
 
     //region methods for test king of writing check
     private void writingTestInstruction(Long chatId) {
         msgSender.sendMessage(chatId, """
-                👋 Hey, welcome to the writing test! 
+                👋 Hey, welcome to the writing test!
                 👉 Here we checked a your writing of the words
                 🤔 Don't worry register of the word isn't important
 
@@ -144,6 +94,15 @@ public class TestHandler {
                 """);
         sendMessageForWordOfWritingTest(chatId);
         cndTest = ConditionTest.ITEM_TRANSLATION_WORD;
+    }
+
+    public void processingOfWritingTest(Long chatId, String text) {
+        if (cndTest.equals(ConditionTest.ITEM_TRANSLATION_WORD)) {
+            processOfTranslationWord(chatId, text);
+        }
+        else if (cndTest.equals(ConditionTest.ITEM_SOURCE_WORD)) {
+            sendMessageForWordOfWritingTest(chatId);
+        }
     }
 
     private void sendWordForWriting(Long chatId) {
@@ -198,6 +157,20 @@ public class TestHandler {
         cndTest = ConditionTest.ITEM_TRANSLATION_WORD;
     }
 
+    private void processingOfFlashCard(Long chatId, String text) {
+        if (cndTest.equals(ConditionTest.ITEM_TRANSLATION_WORD)) {
+            processingTranslateWord(chatId, text);
+        }
+        else if (cndTest.equals(ConditionTest.WAIT_FOR_CONFIRM_MSG)) {
+            confirmTranslate(text);
+            getMsgOfSourceWord(chatId);
+        }
+
+        else if (cndTest.equals(ConditionTest.ITEM_SOURCE_WORD)) {
+            getMsgOfSourceWord(chatId);
+        }
+    }
+
     private void confirmTranslate(String text) {
         if (text.equals("Yup")) {
             if (selectedWord.getIsLearned()) {
@@ -236,6 +209,26 @@ public class TestHandler {
 
 
     //region main methods for processing test
+    private void processingTranslateWord(Long chatId, String text) {
+        if (text.equals("Yup, I know")) {
+            msgSender.sendMessage(
+                    chatId,
+                    "👀 You translated this word like this: " + selectedWord.getTranslateWord(),
+                    new ReplyKeyboardMarkup(
+                            List.of(
+                                    new KeyboardRow(Set.of(new KeyboardButton("Yup"))),
+                                    new KeyboardRow(Set.of(new KeyboardButton("Nope")))
+                            )
+                    ));
+            cndTest = ConditionTest.WAIT_FOR_CONFIRM_MSG;
+        }
+        else if (text.equals("Nope, don't know")) {
+            selectedWord.setIsLearned(false);
+            wordService.save(selectedWord);
+            msgSender.sendMessage(chatId, "🔍 Translate: " + selectedWord.getTranslateWord());
+            getMsgOfSourceWord(chatId);
+        }
+    }
     private void selectedAllTests(Long chatId) {
         var user = userService.findByChatId(chatId);
         if (user.getTests().size() > 0) {
@@ -275,6 +268,32 @@ public class TestHandler {
         else {
             msgSender.sendMessage(chatId, "😕 You don't have any words", KeyboardBuilder.createFunctionalKeyboard());
             cndTest = null;
+        }
+    }
+
+    private void handleTypeOfTest(Long chatId, String text) {
+        typeTest = TypeTest.valueOf(text);
+        if (typeTest.equals(TypeTest.FLASH_CARD)) {
+            flashCardInstruction(chatId);
+        }
+        else if (typeTest.equals(TypeTest.WRITING_TEST)) {
+            writingTestInstruction(chatId);
+        }
+        startTime = LocalDateTime.now();
+    }
+
+    private void handleSelectedListForTest(Long chatId, String text) {
+        var parts = text.split("\\)");
+        var user = userService.findByChatId(chatId);
+        if (parts.length > 0 && parts[0].matches("\\d+")) {
+            var id = Long.parseLong(parts[0]);
+            var test = testService.findById(id).get();
+            if (test.getUser().getId().equals(user.getId())) {
+                sendMessageAboutTest(chatId, test, new StringBuilder());
+                cndTest = null;
+            }
+        } else {
+            msgSender.sendMessage(chatId, "👀 Wrong name of test\n🔍 Try again", KeyboardBuilder.createKeyboardOfTests(user));
         }
     }
 

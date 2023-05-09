@@ -34,7 +34,7 @@ public class CommandHandler {
                                     📖 Here, you can add new words and learn them.
                                     ❗You need to authorized in the system
                                     """,
-                    KeyboardBuilder.createAccountKeyboard()
+                    KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.authTitles)
             );
         }
     }

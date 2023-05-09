@@ -89,7 +89,7 @@ public class ProfileHandler {
         var user = userService.findByChatId(chatId);
         if (user != null && BCrypt.checkpw(text, user.getPassword())) {
             userService.deleteById(user.getId());
-            msgSender.sendMessage(chatId, "User deleted successfully", KeyboardBuilder.createAccountKeyboard());
+            msgSender.sendMessage(chatId, "User deleted successfully",  KeyboardBuilder.createKeyboardOfList(KeyboardBuilder.authTitles));
             cndAuth = null;
         }
         else {

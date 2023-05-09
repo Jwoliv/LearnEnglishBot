@@ -12,18 +12,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class KeyboardBuilder {
-    public static ReplyKeyboardMarkup createAccountKeyboard() {
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        keyboard.setOneTimeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add(new KeyboardButton("Login"));
-        row.add(new KeyboardButton("Sing in"));
-        rows.add(row);
-        keyboard.setKeyboard(rows);
-        return keyboard;
-    }
+    public final static List<String> newTitles = new ArrayList<>(List.of("🆕 New word", "🆕 New list", "🆕 New notification", "📝 Take test"));
+    public final static List<String> deleteTitles = new ArrayList<>(List.of("🗑️ Delete list", "🗑️ Delete word", "❌ Delete all lists","🗑️ Delete notification", "🗑️ Delete profile"));
+    public final static List<String> socialTitles = new ArrayList<>(List.of("💪 Top 20", "👀 Find lists"));
+    public final static List<String> accountTitles = new ArrayList<>(List.of("🔔 All Notifications", "📚 All lists", "📊 All tests", "👤 Profile"));
+    public final static List<String> authTitles = new ArrayList<>(List.of("Login", "Sing in"));
 
     public static ReplyKeyboardMarkup createFunctionalKeyboard() {
         var keyboardMarkup = new ReplyKeyboardMarkup();
@@ -33,25 +26,48 @@ public class KeyboardBuilder {
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         var row1 = new KeyboardRow();
-        row1.add("🆕 New word");
-        row1.add("🆕 New list");
-        row1.add("📚 All lists");
+        row1.add("🆕 New");
+        row1.add("🗑️ Delete");
+
         keyboard.add(row1);
         var row2 = new KeyboardRow();
-        row2.add("🗑️ Delete list");
-        row2.add("🗑️ Delete word");
-        row2.add("❌ Delete all lists");
+        row2.add("📚 Social");
+        row2.add("👤 Account");
+
         keyboard.add(row2);
-        var row3 = new KeyboardRow();
-        row3.add("💪 Top 20");
-        row3.add("📝 Take test");
-        row3.add("👤 Profile");
-        keyboard.add(row3);
-        var row4 = new KeyboardRow();
-        row4.add("📊 All tests");
-        row4.add("👀 Find lists");
-        row4.add("🗑️ Delete profile");
-        keyboard.add(row4);
+
+        keyboardMarkup.setKeyboard(keyboard);
+
+        return keyboardMarkup;
+    }
+
+    public static ReplyKeyboardMarkup createKeyboardOfList(List<String> strings) {
+        var keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setSelective(true);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        int midpoint = (int) Math.ceil(strings.size() / 2.0);
+        List<String> leftColumn = strings.subList(0, midpoint);
+        List<String> rightColumn = strings.subList(midpoint, strings.size());
+
+        KeyboardRow leftRow = new KeyboardRow();
+        KeyboardRow rightRow = new KeyboardRow();
+
+        for (String str : leftColumn) {
+            leftRow.add(new KeyboardButton(str));
+        }
+
+        for (String str : rightColumn) {
+            rightRow.add(new KeyboardButton(str));
+        }
+
+        // Додати рядки до клавіатури
+        keyboard.add(leftRow);
+        keyboard.add(rightRow);
+
         keyboardMarkup.setKeyboard(keyboard);
 
         return keyboardMarkup;

@@ -4,5 +4,7 @@ public enum ConditionNotification {
     NONE,
     WAIT_FOR_TITLE,
     WAIT_FOR_DATE,
-    WAIT_FOR_FREQUENCY
+    WAIT_FOR_TIME,
+    WAIT_FOR_FREQUENCY,
+    DELETE_ITEM
 }

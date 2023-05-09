@@ -19,17 +19,19 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
     private final WordHandler wordHandler;
     private final ProfileHandler profileHandler;
     private final TestHandler testHandler;
+    private final NotificationHandler notificationHandler;
 
 
     private MessageSender msgSender;
 
-    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler, TestHandler testHandler) {
+    public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler, TestHandler testHandler, NotificationHandler notificationHandler) {
         this.authHandler = authHandler;
         this.wordListHandler = wordListHandler;
         this.cmdHandler = cmdHandler;
         this.wordHandler = wordHandler;
         this.profileHandler = profileHandler;
         this.testHandler = testHandler;
+        this.notificationHandler = notificationHandler;
     }
 
     @Autowired
@@ -64,27 +66,47 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
                 default -> {
                     if (text.equals("Login") || text.equals("Sing in")) {
                         authHandler.handleInitialAuthInput(chatId, text);
-                    } else if (text.equals("📚 All lists")) {
+                    }
+                    else if (text.equals("🔔 Notifications")) {
+                        notificationHandler.messageOfAllNotifications(chatId);
+                    }
+                    else if (text.equals("🆕 New notification") || notificationHandler.getCndNot() != null) {
+                        notificationHandler.activeOfNotification(chatId, text);
+                    }
+                    else if (text.equals("🗑️ Delete notification")) {
+                        notificationHandler.activeOfNotification(chatId, text);
+                    }
+                    else if (text.equals("📚 Lists")) {
                         wordListHandler.handlerGetAllListsByUser(chatId);
-                    } else if (text.equals("🗑️ Delete list") || text.equals("❌ Delete all lists")) {
+                    }
+                    else if (text.equals("🗑️ Delete list") || text.equals("❌ Delete all lists")) {
                         wordListHandler.activeWithDeleteList(chatId, text);
-                    } else if (text.equals("👤 Profile")) {
+                    }
+                    else if (text.equals("👤 Profile")) {
                         profileHandler.profileAnswer(chatId);
-                    } else if (text.equals("💪 Top 20")) {
+                    }
+                    else if (text.equals("💪 Top 20")) {
                         profileHandler.profileTop20Users(chatId);
-                    } else if (text.equals("🗑️ Delete profile") || profileHandler.getCndAuth() != null && profileHandler.getCndAuth().equals(ConditionAuth.DELETE_USER)) {
+                    }
+                    else if (text.equals("🗑️ Delete profile") || profileHandler.getCndAuth() != null && profileHandler.getCndAuth().equals(ConditionAuth.DELETE_USER)) {
                         profileHandler.processingOfDeleteUser(chatId, text);
-                    } else if (text.equals("👀 Find lists")) {
+                    }
+                    else if (text.equals("👀 Find lists")) {
                         wordListHandler.activeWithList(chatId, text);
-                    } else if (testHandler.getCndTest() != null || text.equals("📝 Take test") || text.equals("📊 All tests")) {
+                    }
+                    else if (testHandler.getCndTest() != null || text.equals("📝 Take test") || text.equals("📊 Tests")) {
                         testHandler.activeTest(chatId, text);
-                    } else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
+                    }
+                    else if (wordListHandler.getCndWordList() != null || text.equals("🆕 New list")) {
                         wordListHandler.activeWithList(chatId, text);
-                    } else if (wordHandler.getCndWord() != null || text.equals("🆕 New word") || text.equals("🗑️ Delete word")) {
+                    }
+                    else if (wordHandler.getCndWord() != null || text.equals("🆕 New word") || text.equals("🗑️ Delete word")) {
                         wordHandler.activeWord(chatId, text);
-                    } else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
+                    }
+                    else if (authHandler.getCndAuth().toString().startsWith("SING_IN")) {
                         authHandler.handleSignUpInput(chatId, text);
-                    } else if (authHandler.getCndAuth().toString().startsWith("LOGIN")) {
+                    }
+                    else if (authHandler.getCndAuth().toString().startsWith("LOGIN")) {
                         authHandler.handleLoginInput(chatId, text);
                     }
                 }
@@ -108,5 +130,6 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
         wordHandler.setCndWord(null);
         authHandler.setCndAuth(null);
         profileHandler.setCndAuth(null);
+        notificationHandler.setCndNot(null);
     }
 }

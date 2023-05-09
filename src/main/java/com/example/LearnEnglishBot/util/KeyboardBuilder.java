@@ -15,7 +15,7 @@ public class KeyboardBuilder {
     public final static List<String> newTitles = new ArrayList<>(List.of("🆕 New word", "🆕 New list", "🆕 New notification", "📝 Take test"));
     public final static List<String> deleteTitles = new ArrayList<>(List.of("🗑️ Delete list", "🗑️ Delete word", "❌ Delete all lists","🗑️ Delete notification", "🗑️ Delete profile"));
     public final static List<String> socialTitles = new ArrayList<>(List.of("💪 Top 20", "👀 Find lists"));
-    public final static List<String> accountTitles = new ArrayList<>(List.of("🔔 All Notifications", "📚 All lists", "📊 All tests", "👤 Profile"));
+    public final static List<String> accountTitles = new ArrayList<>(List.of("🔔 Notifications", "📚 Lists", "📊 Tests", "👤 Profile"));
     public final static List<String> authTitles = new ArrayList<>(List.of("Login", "Sing in"));
 
     public static ReplyKeyboardMarkup createFunctionalKeyboard() {

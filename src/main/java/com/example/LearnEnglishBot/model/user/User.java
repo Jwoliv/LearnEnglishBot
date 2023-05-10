@@ -29,6 +29,7 @@ public class User implements BaseEntity {
     private String username;
     private String password;
     private Long chatId;
+    private Role role;
     private Float reputation;
     private LocalDateTime registrationTime;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

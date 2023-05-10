@@ -1,5 +1,6 @@
 package com.example.LearnEnglishBot.service;
 
+import com.example.LearnEnglishBot.model.user.Role;
 import com.example.LearnEnglishBot.model.user.User;
 import com.example.LearnEnglishBot.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
@@ -31,6 +32,7 @@ public class UserService extends BaseService<User, UserRepository> {
                 .username(username)
                 .password(hashedPassword)
                 .chatId(chatId)
+                .role(Role.USER)
                 .registrationTime(LocalDateTime.now())
                 .reputation(0.0F)
                 .build();

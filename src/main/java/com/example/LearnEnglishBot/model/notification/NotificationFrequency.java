@@ -1,11 +1,10 @@
 package com.example.LearnEnglishBot.model.notification;
 
 public enum NotificationFrequency {
+    ONCE("Once"),
     DAILY("Daily"),
     WEEKLY("Weekly"),
     MONTHLY("Monthly"),
-    QUARTERLY("Quarterly"),
-    SEMI_ANNUALLY("Semi-annually"),
     YEARLY("Yearly");
 
     private final String displayName;

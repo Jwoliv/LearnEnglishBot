@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 @Component
 @Getter
 @Setter
+@EnableScheduling
 public class NotificationHandler {
     private final UserService userService;
     private final NotificationService notificationService;
@@ -84,6 +87,40 @@ public class NotificationHandler {
             msgSender.sendMessage(chatId, "👀 You don't have a notifications", KeyboardBuilder.createFunctionalKeyboard());
         }
     }
+
+    @Scheduled(fixedDelay =  1000 * 60)
+    public void checkNotifications() {
+        var users = userService.findAll();
+        var currentDate = FormatTime.formattedTimeOnlyDate(LocalDateTime.now());
+        for (var user : users) {
+            var notifications = user.getNotifications().stream()
+                    .filter(x -> FormatTime.formattedTimeOnlyDate(x.getLocalDateTime()).equals(currentDate))
+                    .toList();
+
+            var sb = new StringBuilder();
+            notifications.forEach(nt -> {
+                sb.append("🔥")
+                        .append(nt.getTitle())
+                        .append(" - ")
+                        .append(nt.getLocalDateTime())
+                        .append("\n");
+
+                if (nt.getFrequency().equals(NotificationFrequency.ONCE)) {
+                    notificationService.deleteById(nt.getId());
+                } else {
+                    switch (nt.getFrequency()) {
+                        case DAILY   -> nt.setLocalDateTime(LocalDateTime.now().plusDays(1));
+                        case WEEKLY -> nt.setLocalDateTime(LocalDateTime.now().plusWeeks(1));
+                        case MONTHLY -> nt.setLocalDateTime(LocalDateTime.now().plusMonths(1));
+                        case YEARLY  -> nt.setLocalDateTime(LocalDateTime.now().plusYears(1));
+                    }
+                    notificationService.save(nt);
+                }
+                msgSender.sendMessage(user.getChatId(), sb.toString(), KeyboardBuilder.createFunctionalKeyboard());
+            });
+        }
+    }
+
 
     private void prepareDeleteNotification(Long chatId) {
         var user = userService.findByChatId(chatId);

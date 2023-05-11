@@ -4,7 +4,9 @@ import com.example.LearnEnglishBot.handlers.*;
 import com.example.LearnEnglishBot.model.user.ConditionAuth;
 import com.example.LearnEnglishBot.util.KeyboardBuilder;
 import com.example.LearnEnglishBot.util.MessageSender;
+import jakarta.persistence.PrePersist;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -23,6 +25,11 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
 
 
     private MessageSender msgSender;
+
+    @Value("${bot.username}")
+    private String username;
+    @Value("${bot.token}")
+    private String token;
 
     public LearnEnglishBot(UserAuthHandler authHandler, WordListHandler wordListHandler, CommandHandler cmdHandler, WordHandler wordHandler, ProfileHandler profileHandler, TestHandler testHandler, NotificationHandler notificationHandler) {
         this.authHandler = authHandler;
@@ -116,12 +123,12 @@ public class LearnEnglishBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "learn_eng_ua_bot";
+        return username;
     }
 
     @Override
     public String getBotToken() {
-        return "6222379522:AAEBvxLMf7xhpo1qzqiH3IomWhPLa2aiI40";
+        return token;
     }
 
     public void resetTrackingStatus() {

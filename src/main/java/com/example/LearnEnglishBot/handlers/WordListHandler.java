@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -21,6 +23,7 @@ import java.util.List;
 @Component
 @Getter
 @Setter
+@EnableScheduling
 public class WordListHandler {
     private String title;
     private Category category;
@@ -365,5 +368,13 @@ public class WordListHandler {
         cndWordList = null;
         return sb.toString();
     }
+
+    @Scheduled(fixedDelay = 1000 * 60 * 60 * 24)
+    private void cancellationReputationLists() {
+        var lists = wordListService.findAll();
+        lists.forEach(x -> x.setReputation(0.0F));
+        wordListService.saveAll(lists);
+    }
+
 
 }
